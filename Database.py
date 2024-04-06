@@ -11,26 +11,29 @@ class Database:
 
     def create_tables(self):
         self.cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-                                    full_name TEXT,
-                                    student_number TEXT,
-                                    birth_date TEXT,
-                                    username TEXT PRIMARY KEY,
+                                    first_name TEXT,
+                                    last_name TEXT,
+                                    student_number TEXT PRIMARY KEY,
+                                    username TEXT,
                                     password TEXT
                                 )''')
 
         self.cursor.execute('''CREATE TABLE IF NOT EXISTS tasks (
-                                    name TEXT,
-                                    description TEXT,
-                                    deadline TEXT,
+                                    task_name TEXT,
+                                    task_desc TEXT,
+                                    date TEXT,
+                                    time TEXT,
+                                    task_sub TEXT,
+                                    task_cat TEXT,
                                     status TEXT,
-                                    username TEXT,
-                                    FOREIGN KEY (username) REFERENCES users(username)
+                                    student_number TEXT,
+                                    FOREIGN KEY (student_number) REFERENCES users(student_number)
                                 )''')
         self.conn.commit()
 
     def save_user(self, user):
         self.cursor.execute('''INSERT INTO users VALUES (?, ?, ?, ?, ?)''',
-                            (user.full_name, user.student_number, user.birth_date, user.username, user.password))
+                            (user.first_name, user.last_name, user.student_number, user.username, user.password))
         self.conn.commit()
 
     def load_users(self):
@@ -42,21 +45,21 @@ class Database:
             users.append(user)
         return users
 
-    def save_task(self, task, username):
-        self.cursor.execute('''INSERT INTO tasks VALUES (?, ?, ?, ?, ?)''',
-                            (task.name, task.description, task.deadline, task.status, username))
+    def save_task(self, task, student_number):
+        self.cursor.execute('''INSERT INTO tasks VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                            (task.task_name, task.task_desc, task.date, task.time, task.task_sub, task.task_cat, task.status, student_number))
         self.conn.commit()
 
-    def delete_task(self, task, username):
-        self.cursor.execute('''DELETE FROM tasks WHERE name = ? AND username = ?''', (task.name, username))
+    def delete_task(self, task, student_number):
+        self.cursor.execute('''DELETE FROM tasks WHERE task_name = ? AND student_number = ?''', (task.task_name, student_number))
         self.conn.commit()
 
-    def load_tasks(self, username):
-        self.cursor.execute('''SELECT * FROM tasks WHERE username = ?''', (username,))
+    def load_tasks(self, student_number):
+        self.cursor.execute('''SELECT * FROM tasks WHERE student_number = ?''', (student_number,))
         rows = self.cursor.fetchall()
         tasks = []
         for row in rows:
-            task = Task(row[0], row[1], row[2], row[3])
+            task = Task(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
             tasks.append(task)
         return tasks
 

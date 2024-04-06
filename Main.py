@@ -64,9 +64,9 @@ def login(db_users):
 
 
 def create_account(db_users):
-    fName = input("Enter your name: ")
+    firstName = input("Enter your first name: ")
+    lastName = input("Enter your last name: ")
     studentNum = input("Student Number: ")
-    birthDate = input("Birth Date: ")
     username = input("Desired Username: ")
     password = input("Desired Password: ")
 
@@ -77,7 +77,7 @@ def create_account(db_users):
             print("Username already exists.")
             return
 
-    new_user = User(fName, studentNum, birthDate, username, password)
+    new_user = User(firstName, lastName, studentNum, username, password)
     db_users.save_user(new_user)
     print('========================================================')
     print("Account created successfully!")
@@ -86,11 +86,11 @@ def create_account(db_users):
 def main_menu(user, db_tasks):
     while True:
         print('========================================================')
-        print(f"Hi {user.full_name}, Welcome to TaskWise!")
+        print(f"Hi {user.first_name}, Welcome to TaskWise!")
         print('Your tasks today:')
-        tasks = db_tasks.load_tasks(user.username)
+        tasks = db_tasks.load_tasks(user.student_number)
         for i, task in enumerate(tasks, start=1):
-            print(f"{i}. {task.name} - {task.description} - Deadline: {task.deadline} - Status: {task.status}")
+            print(f"{i}. {task.task_name} - {task.task_desc} - Date: {task.date} - Time: {task.time} - Status: {task.status}")
         print('========================================================')
         print('\t1. Create Task')
         print('\t2. Update Task')
@@ -123,25 +123,28 @@ def main_menu(user, db_tasks):
 
 
 def create_task(user, db_tasks):
-    name = input("Enter Task Name: ")
-    description = input("Enter Task Description: ")
-    deadline = input("Enter Task Deadline (YYYY-MM-DD): ")
+    task_name = input("Enter Task Name: ")
+    task_desc = input("Enter Task Description: ")
+    task_date = input("Enter Task Deadline (YYYY-MM-DD): ")
+    task_time = input("Enter Task Time (00:00 AM/PM): ")
+    task_sub = input("Enter Task Subject: ")
+    task_cat = input("Enter Task Category: ")
     status = "Incomplete"
-    new_task = Task(name, description, deadline, status)
-    db_tasks.save_task(new_task, user.username)
+    new_task = Task(task_name, task_desc, task_date, task_time, task_sub, task_cat, status)
+    db_tasks.save_task(new_task, user.student_number)
     print('========================================================')
     print('Task created successfully!')
 
 
 def update_task(user, db_tasks):
-    tasks = db_tasks.load_tasks(user.username)
+    tasks = db_tasks.load_tasks(user.student_number)
     if not tasks:
         print("No tasks found.")
         return
 
     print("Select the task you want to update:")
     for i, task in enumerate(tasks, start=1):
-        print(f"{i}. {task.name} - {task.description} - Deadline: {task.deadline} - Status: {task.status}")
+        print(f"{i}. {task.task_name} - {task.task_desc} - Date: {task.date} - Time: {task.time} - Status: {task.status}")
 
     try:
         task_index = int(input("Enter the task index: ")) - 1
@@ -149,11 +152,14 @@ def update_task(user, db_tasks):
             task = tasks[task_index]
             new_name = input("Enter new task name: ")
             new_description = input("Enter new task description: ")
-            new_deadline = input("Enter new task deadline (YYYY-MM-DD): ")
+            new_date = input("Enter new task deadline (YYYY-MM-DD): ")
+            new_time = input("Enter new task time(HH:SS AM/PM): ")
             task.name = new_name if new_name else task.name
-            task.description = new_description if new_description else task.description
-            task.deadline = new_deadline if new_deadline else task.deadline
-            db_tasks.save_task(task, user.username)
+            task.task_desc = new_description if new_description else task.task_desc
+            task.date = new_date if new_date else task.date
+            task.time = new_time if new_time else task.time
+
+            db_tasks.save_task(task, user.student_number)
             print('========================================================')
             print("Task updated successfully!")
         else:
@@ -163,20 +169,20 @@ def update_task(user, db_tasks):
 
 
 def delete_task(user, db_tasks):
-    tasks = db_tasks.load_tasks(user.username)
+    tasks = db_tasks.load_tasks(user.student_number)
     if not tasks:
         print("No tasks found.")
         return
 
     print("Select the task you want to delete:")
     for i, task in enumerate(tasks, start=1):
-        print(f"{i}. {task.name} - {task.description} - Deadline: {task.deadline} - Status: {task.status}")
+        print(f"{i}. {task.task_name} - {task.task_desc} - Date: {task.date} - Time: {task.time} - Status: {task.status}")
 
     try:
         task_index = int(input("Enter the task index: ")) - 1
         if 0 <= task_index < len(tasks):
             task = tasks[task_index]
-            db_tasks.delete_task(task, user.username)
+            db_tasks.delete_task(task, user.student_number)
             print('========================================================')
             print("Task deleted successfully!")
         else:
@@ -187,32 +193,32 @@ def delete_task(user, db_tasks):
 
 def search_task(user, db_tasks):
     keyword = input("Enter a keyword to search: ")
-    tasks = db_tasks.load_tasks(user.username)
-    found_tasks = [task for task in tasks if keyword.lower() in task.name.lower()]
+    tasks = db_tasks.load_tasks(user.student_number)
+    found_tasks = [task for task in tasks if keyword.lower() in task.task_name.lower()]
     if found_tasks:
         print("Matching tasks:")
         for i, task in enumerate(found_tasks, start=1):
-            print(f"{i}. {task.name} - {task.description} - Deadline: {task.deadline} - Status: {task.status}")
+            print(f"{i}. {task.task_name} - {task.task_desc} - Date: {task.date} - Time: {task.time} - Status: {task.status}")
     else:
         print("No matching tasks found.")
 
 
 def mark_task_completed(user, db_tasks):
-    tasks = db_tasks.load_tasks(user.username)
+    tasks = db_tasks.load_tasks(user.student_number)
     if not tasks:
         print("No tasks found.")
         return
 
     print("Select the task you want to mark as completed:")
     for i, task in enumerate(tasks, start=1):
-        print(f"{i}. {task.name} - {task.description} - Deadline: {task.deadline} - Status: {task.status}")
+        print(f"{i}. {task.task_name} - {task.task_desc} - Date: {task.date} - Time: {task.time} - Status: {task.status}")
 
     try:
         task_index = int(input("Enter the task index: ")) - 1
         if 0 <= task_index < len(tasks):
             task = tasks[task_index]
             task.status = "Completed"
-            db_tasks.save_task(task, user.username)
+            db_tasks.save_task(task, user.student_number)
             print('========================================================')
             print("Task marked as completed!")
         else:

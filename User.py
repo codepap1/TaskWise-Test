@@ -1,7 +1,7 @@
 class User:
-    def __init__(self, full_name, student_number, birth_date, username, password):
-        self.full_name = full_name
+    def __init__(self, first_name, last_name, student_number, username, password):
+        self.first_name = first_name
+        self.last_name = last_name
         self.student_number = student_number
-        self.birth_date = birth_date
         self.username = username
         self.password = password
